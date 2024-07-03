@@ -4,17 +4,31 @@ interface BtnProps {
   label: string
   type: 'submit' | 'button'
   onClick: any
+  disabled?: boolean
   className?: string
 }
 
-export default function Btn({ label, type = 'submit', onClick,className }: BtnProps) {
+export default function Btn({
+  label,
+  type = 'submit',
+  onClick,
+  disabled,
+  className
+}: BtnProps) {
   return (
     <button
       type={type}
-      className={ cn("w-full !mt-6 py-2 px-4 bg-blue-500 text-white rounded-md", className)}
+      className={cn(
+        `w-full !mt-6 py-2 px-4
+        bg-blue-500 text-white rounded-md transition
+        disabled:bg-slate-500 disabled:text-gray-300
+        disabled:cursor-not-allowed`,
+        className,
+      )}
       onClick={onClick}
+      disabled={disabled}
     >
-      {label}
+      {disabled ? 'Loading...' : label}
     </button>
   )
 }

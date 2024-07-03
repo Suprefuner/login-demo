@@ -8,8 +8,10 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute = ({ children }:ProtectedRouteProps) => {
   const userId = useAuth(state => state.userId)
-  if (!userId) return <Navigate to="/login" />
-  return children
+
+  return !userId
+    ? <Navigate to="/login" />
+    : children
 }
 
 export default ProtectedRoute
