@@ -16,11 +16,13 @@ app.use(cookieParser(process.env.JWT_SECRET))
 const connectDB = require('./db/connect')
 const authRouter = require('./routes/auth')
 const dashboardRouter = require('./routes/dashboard')
+const userRouter = require('./routes/user')
 
 // *** routes
 app
   .use('/api/auth', authRouter)
   .use('/api/dashboard', dashboardRouter)
+  .use('/api/user', userRouter)
 
 app.use(notFoundMiddleware)
 app.use(errorHandlerMiddleware)

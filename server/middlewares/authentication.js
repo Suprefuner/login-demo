@@ -1,49 +1,56 @@
-const { CustomAPIError } = require("../errors/custom-error")
-const Token = require("../models/Token")
-const { isTokenValid, attachTokenToCookie } = require("../utils/jwt")
+const { 
+  UnauthorizedError, 
+  UnauthenticatedError
+} = require("../errors/custom-error")
+const { isTokenValid } = require("../utils/jwt")
 
 const authenticateUser = async (req, res, next) => {
   const { refreshToken, accessToken } = req.signedCookies
 
-  try {
-    if (accessToken) {
-      const payload = isTokenValid(accessToken)
-      req.user = payload.user
-      return next()
-    }
-
-    const payload = isTokenValid(refreshToken)
-    const existingToken = await Token.findOne({
-      user: payload.user.id,
-      refreshToken: payload.refreshToken
-    })
-
-    if (!existingToken || !existingToken?.isValid) {
-      throw new CustomAPIError('authentication failed, please login', 401)
-    }
-
-    req.user = payload.user
-    attachTokenToCookie({
-      res, 
-      user: payload.user,
-      refreshToken
-    })
-  } catch (err) {
-    throw new CustomAPIError('authentication failed, please login', 401)
+  if (!refreshToken && !accessToken) {
+    throw new UnauthenticatedError()
   }
-  
+
+  try {
+    let payload = isTokenValid(accessToken || refreshToken)
+    req.user = payload.user
+  } catch (err) {
+    throw new UnauthenticatedError()
+  }
+
   next()
 }
 
 const restrictToRoles = (...roles) => {
-  return (req, res, next) => {
-    const { user } = req
-    if (!user) {
-      throw new CustomAPIError('please login', 401)
+  return async (req, res, next) => {
+    const { id } = req.params
+    const { user: currentUser } = req
+    
+    // QUESTION: should I keep this logic? redundant?
+    // if (!currentUser) {
+    //   throw new CustomAPIError('please login', 401)
+    // }
+
+    // me(X) && role(X) 
+    if (!roles.includes('me') && !roles.includes(currentUser.role)) {
+      throw new UnauthorizedError()
     }
 
-    if (!roles.includes(user.role)) {
-      throw new CustomAPIError('no permission to access', 403)
+    // only that user could perform this action
+    if (roles.includes('me') && roles.length === 1) {
+      if (currentUser.id !== id) {
+        throw new UnauthorizedError()
+      }
+    }
+
+    // both that user or specific role can perform
+    if (roles.includes('me') && roles.length > 1) {
+      const isMe = currentUser.id === id
+      const isIncludedRole = roles.includes(currentUser.role)
+
+      if (!isMe && !isIncludedRole) {
+        throw new UnauthorizedError()
+      }
     }
 
     next()
@@ -52,5 +59,5 @@ const restrictToRoles = (...roles) => {
 
 module.exports = {
   authenticateUser,
-  restrictToRoles
+  restrictToRoles,
 }

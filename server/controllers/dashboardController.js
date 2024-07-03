@@ -1,20 +1,16 @@
-const jwt = require('jsonwebtoken')
-
-const dashboard = (req, res) => {
+const dashboard = (_, res) => {
   res.json({
     success: true,
     message: "here is dashboard"
   })
 }
 
-const adminDashboard = (req, res) => {
+const adminDashboard = (_, res) => {
   res.json({
     success: true,
     message: "here is admin dashboard"
   })
 }
-
-
 
 module.exports = {
   dashboard,

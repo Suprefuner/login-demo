@@ -1,0 +1,32 @@
+Todo:
+	✔ i should remove the cookie if the jwt if not valid @done (7/2/2024, 9:23:11 PM)
+	✘ implement beforeunload to save jwt to local storage @cancelled (7/2/2024, 9:47:03 PM)
+	✔ add verified block action feature on frontend @done (7/2/2024, 9:47:17 PM)
+	✔ create loading state UI for api call @done (7/2/2024, 10:05:57 PM)
+	✘ show message and redirect in 3s and show message @cancelled (7/2/2024, 10:06:11 PM)
+	✔ custom the password input show hide icon @done (7/2/2024, 10:23:52 PM)
+	☐ mark my code theory and try to explain how this works
+
+Test:
+☐ test the whole work flow
+	☐ register
+	☐ login
+	☐ forgot password
+	☐ reset password
+
+Flow:
+1. register
+2. login without verify
+3. check email to verify
+4. login
+5. perform admin action(s)
+5.1 close browser and re-open show still login
+6. register other user
+7. verify
+8. try to access admin page and deny
+9. reset password
+10. check reset password email
+11. show missing token or email wil redirect back to login
+12. use postman show admin can't change user password
+13. use admin account to change user to admin
+14. login user account and perform admin actions

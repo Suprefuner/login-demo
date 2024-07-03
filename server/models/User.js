@@ -1,7 +1,6 @@
 const mongoose = require('mongoose')
 const validator = require('validator')
 const bcrypt = require('bcryptjs')
-const Token = require('./Token')
 
 const userSchema = new mongoose.Schema({
   email: {
@@ -14,7 +13,7 @@ const userSchema = new mongoose.Schema({
   role: {
     type: String, 
     enum: ["user", "admin"],
-    default: "user",
+    required: true,
   },
   password: {
     type: String,
@@ -22,16 +21,25 @@ const userSchema = new mongoose.Schema({
     minlength: [4, "can't shorter than 4 characters"],
     select: false,
   },
-  passwordConfirm: {
-    type: String,
-    required: [true, "must confirm password"],
-    validate: {
-      validator: function (el) {
-        return el === this.password
-      }
-    }
+  passwordLastChangedAt: Date,
+  isVerified: {
+    type: Boolean,
+    default: false
   },
-  passwordLastChangedAt: Date
+  verificationToken: {
+    type: String, 
+    select: false
+  },
+  verifiedDate: Date,
+  resetPasswordToken: {
+    type: String, 
+    select: false
+  },
+  resetPasswordTokenExpireDate: Date,
+  active: {
+    type: Boolean, 
+    default: true
+  }
 }, {
   timestamps: true
 })
@@ -40,29 +48,18 @@ userSchema.pre('save', async function(next) {
   if (!this.isModified('password')) return next()
   
   this.password = await bcrypt.hash(this.password, 12)
-  this.passwordConfirm = undefined
-  next()
-})
 
-userSchema.post('findOneAndDelete', async function () {
-  const userToken = await Token.findOneAndDelete({
-    user: this.getQuery()._id
-  })
-  console.log(`${userToken} is removed`);
+  if (this.isVerified) return next()
+
+  this.passwordLastChangedAt = Date.now()
+  next()
 })
 
 userSchema.methods.comparePassword = async (
   inputPassword,
   userPassword
-) => {
-  return await bcrypt.compare(inputPassword, userPassword)
-}
-
-userSchema.methods.hasChangedPasswordAfter = function (jwtTimestamp) {
-  if (this.passwordLastChangedAt) {
-    return this.passwordLastChangedAt > jwtTimestamp
-  }
-  return false
-}
+) => (
+  await bcrypt.compare(inputPassword, userPassword)
+)
 
 module.exports = mongoose.model('User', userSchema)
