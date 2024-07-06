@@ -7,33 +7,30 @@ class CustomAPIError extends Error{
 
 class UnauthorizedError extends CustomAPIError{
   constructor(message) {
-    this.message = message || 'no permission'
-    this.statusCode = 403
+    super(message || 'no permission', 403)
   }
 }
 
 class UnauthenticatedError extends CustomAPIError{
   constructor(message) {
-    this.message = message || 'authentication failed, please login'
-    this.statusCode = 401
+    super(message || 'authentication failed, please login', 401)
   }
 }
 
 class NotFoundError extends CustomAPIError{
   constructor(message) {
-    this.message = message
-    this.statusCode = 404
+    super(message || 'data not found', 404)
   }
 }
 
 class BadRequestError extends CustomAPIError{
   constructor(message) {
-    this.message = message
-    this.statusCode = 400
+    super(message || 'please provide required data', 400)
   }
 }
 
 module.exports = {
+  CustomAPIError,
   UnauthorizedError,
   UnauthenticatedError,
   NotFoundError,
